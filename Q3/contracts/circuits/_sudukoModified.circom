@@ -1,11 +1,11 @@
 // [assignment] please copy the entire modified sudoku.circom here
 pragma circom 2.0.3;
 
-include "../node_modules/circomlib-matrix/circuits/matAdd.circom";
-include "../node_modules/circomlib-matrix/circuits/matElemMul.circom";
-include "../node_modules/circomlib-matrix/circuits/matElemSum.circom";
-include "../node_modules/circomlib-matrix/circuits/matElemPow.circom";
-include "../node_modules/circomlib/circuits/poseidon.circom";
+include "../_matAdd.circom";
+include "../_matElemMul.circom";
+include "../_matElemSum.circom";
+include "../_matElemPow.circom";
+include "../_poseidon.circom";
 include "../../../contracts/circuits/RangeProof.circom";
 
 template sudoku() {

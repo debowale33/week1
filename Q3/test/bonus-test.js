@@ -23,43 +23,44 @@ function unstringifyBigInts(o) {
     }
 }
 
-describe("SystemOfEquations", function () {
-    let Verifier;
-    let verifier;
 
-    beforeEach(async function () {
-        Verifier = await ethers.getContractFactory("SystemOfEquationsVerifier");
-        verifier = await Verifier.deploy();
-        await verifier.deployed();
-    });
-
-    it("Should return true for correct proof", async function () {
-        //[assignment] Add comments to explain what each line is doing
-        const { proof, publicSignals } = await groth16.fullProve({
-            "x": ["15","17","19"],
-            "A": [["1","1","1"],["1","2","3"],["2","-1","1"]],
-            "b": ["51", "106", "32"]
-        },
-            "contracts/bonus/SystemOfEquations/SystemOfEquations_js/SystemOfEquations.wasm","contracts/bonus/SystemOfEquations/circuit_final.zkey");
-
-        const editedPublicSignals = unstringifyBigInts(publicSignals);
-        const editedProof = unstringifyBigInts(proof);
-        const calldata = await groth16.exportSolidityCallData(editedProof, editedPublicSignals);
+    describe("Test LessThan10", function () {
+        let Verifier;
+        let verifier;
     
-        const argv = calldata.replace(/["[\]\s]/g, "").split(',').map(x => BigInt(x).toString());
+        beforeEach(async function () {
+            Verifier = await ethers.getContractFactory("LessThan10TestVerifier");
+            verifier = await Verifier.deploy();
+            await verifier.deployed();
+        });
     
-        const a = [argv[0], argv[1]];
-        const b = [[argv[2], argv[3]], [argv[4], argv[5]]];
-        const c = [argv[6], argv[7]];
-        const Input = argv.slice(8);
+        it("Should return true for correct proof", async function () {
+            //[assignment] Add comments to explain what each line is doing
+            const { proof, publicSignals } = await groth16.fullProve({
+                in: 9
+            },
+                "contracts/circuits/LessThan10/LessThan10_js/LessThan10.wasm","contracts/circuits/LessThan10/circuit_final.zkey");
+            
+            console.log("Is 9 < 10? ", publicSignals[0]);
 
-        expect(await verifier.verifyProof(a, b, c, Input)).to.be.true;
-    });
-    it("Should return false for invalid proof", async function () {
-        let a = [0, 0];
-        let b = [[0, 0], [0, 0]];
-        let c = [0, 0];
-        let d = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-        expect(await verifier.verifyProof(a, b, c, d)).to.be.false;
-    });
+            const editedPublicSignals = unstringifyBigInts(publicSignals);
+            const editedProof = unstringifyBigInts(proof);
+            const calldata = await groth16.exportSolidityCallData(editedProof, editedPublicSignals);
+        
+            const argv = calldata.replace(/["[\]\s]/g, "").split(',').map(x => BigInt(x).toString());
+        
+            const a = [argv[0], argv[1]];
+            const b = [[argv[2], argv[3]], [argv[4], argv[5]]];
+            const c = [argv[6], argv[7]];
+            const Input = argv.slice(8);
+    
+            expect(await verifier.verifyProof(a, b, c, Input)).to.be.true;
+        });
+        it("Should return false for invalid proof", async function () {
+            let a = [0, 0];
+            let b = [[0, 0], [0, 0]];
+            let c = [0, 0];
+            let d = [0];
+            expect(await verifier.verifyProof(a, b, c, d)).to.be.false;
+        });
 });
